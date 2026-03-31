@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mes Animaux – Panneau Documentaire</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;800&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green: #2ecc71; --green-dark: #27ae60;
+    --blue: #3498db; --blue-dark: #2980b9;
+    --bg: #f0f7f4; --card-bg: #ffffff;
+    --text: #2c3e50; --text-light: #7f8c8d;
+    --radius: 18px; --shadow: 0 4px 20px rgba(0,0,0,0.10);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  header { background: linear-gradient(135deg, #1a6b3c 0%, #27ae60 60%, #2ecc71 100%); padding: 28px 20px 20px; text-align: center; }
+  header h1 { font-family: 'Baloo 2', cursive; font-size: 2.2rem; font-weight: 800; color: white; text-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+  header p { color: rgba(255,255,255,0.85); font-size: 1rem; margin-top: 6px; }
+  .search-wrap { max-width: 700px; margin: 20px auto 0; padding: 0 16px; position: relative; }
+  .search-wrap input { width: 100%; padding: 14px 20px 14px 48px; border: none; border-radius: 50px; font-family: 'Nunito', sans-serif; font-size: 1rem; background: white; box-shadow: var(--shadow); outline: none; color: var(--text); }
+  .search-wrap::before { content: '🔍'; position: absolute; left: 32px; top: 50%; transform: translateY(-50%); }
+
+  .tabs-wrap { display: flex; justify-content: center; gap: 12px; padding: 24px 16px 8px; }
+  .tab-btn { padding: 12px 32px; border-radius: 50px; border: none; font-family: 'Baloo 2', cursive; font-size: 1.05rem; font-weight: 600; cursor: pointer; transition: all 0.25s ease; display: flex; align-items: center; gap: 8px; }
+  .tab-btn.active-3p { background: linear-gradient(135deg, #3498db, #2980b9); color: white; box-shadow: 0 4px 15px rgba(52,152,219,0.4); transform: translateY(-2px); }
+  .tab-btn.inactive-3p { background: white; color: var(--blue-dark); box-shadow: var(--shadow); }
+  .tab-btn.active-4p { background: linear-gradient(135deg, #9b59b6, #8e44ad); color: white; box-shadow: 0 4px 15px rgba(155,89,182,0.4); transform: translateY(-2px); }
+  .tab-btn.inactive-4p { background: white; color: #8e44ad; box-shadow: var(--shadow); }
+  .level-badge { background: rgba(255,255,255,0.25); border-radius: 20px; padding: 2px 8px; font-size: 0.8rem; }
+
+  .animals-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px; max-width: 1200px; margin: 0 auto; padding: 20px 20px 60px; }
+
+  .animal-card { background: var(--card-bg); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; transition: transform 0.2s ease, box-shadow 0.2s ease; display: flex; flex-direction: column; }
+  .animal-card:hover { transform: translateY(-4px); box-shadow: 0 8px 30px rgba(0,0,0,0.15); }
+  .animal-card.hidden { display: none; }
+
+  .card-visual { padding: 18px 18px 14px; display: flex; align-items: center; gap: 16px; border-bottom: 2px dashed #e8f5e9; }
+  .card-big-emoji { font-size: 4rem; line-height: 1; flex-shrink: 0; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15)); }
+  .card-photo-links { display: flex; flex-direction: column; gap: 7px; flex: 1; }
+  .photo-link { display: flex; align-items: center; gap: 8px; background: #f0f9f4; border: 1.5px solid #c8f0da; border-radius: 10px; padding: 7px 12px; text-decoration: none; color: #1e8449; font-size: 0.82rem; font-weight: 700; transition: background 0.15s, transform 0.15s; }
+  .photo-link:hover { background: #d5f5e3; transform: translateX(3px); }
+
+  .card-body { padding: 14px 18px 16px; flex: 1; display: flex; flex-direction: column; }
+  .card-title { font-family: 'Baloo 2', cursive; font-size: 1.3rem; font-weight: 800; color: var(--text); margin-bottom: 4px; }
+  .card-tag { display: inline-block; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; padding: 3px 10px; border-radius: 20px; margin-bottom: 12px; color: white; }
+  .tag-oiseau { background: linear-gradient(135deg, #3498db, #2980b9); }
+  .tag-mammifere { background: linear-gradient(135deg, #e67e22, #d35400); }
+  .tag-reptile { background: linear-gradient(135deg, #27ae60, #1e8449); }
+  .tag-fossile { background: linear-gradient(135deg, #95a5a6, #7f8c8d); }
+  .tag-insecte { background: linear-gradient(135deg, #f39c12, #e67e22); }
+
+  .desc-3p, .desc-4p { display: none; }
+  .desc-3p.visible, .desc-4p.visible { display: block; }
+  .desc-label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; padding: 4px 10px; border-radius: 20px; display: inline-block; }
+  .label-3p { background: #ebf5fb; color: var(--blue-dark); }
+  .label-4p { background: #f5eef8; color: #8e44ad; }
+  .desc-text { font-size: 0.95rem; line-height: 1.65; color: var(--text); }
+
+  .body-parts { margin-top: 14px; padding: 10px 14px; background: #f8fffe; border-radius: 10px; border-left: 4px solid var(--green); }
+  .body-parts-title { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; color: var(--green-dark); letter-spacing: 0.06em; margin-bottom: 6px; }
+  .body-parts-list { display: flex; flex-wrap: wrap; gap: 6px; }
+  .body-part-tag { background: white; border: 1.5px solid #c8f0da; color: var(--green-dark); border-radius: 20px; padding: 3px 10px; font-size: 0.82rem; font-weight: 600; }
+
+  .no-results { text-align: center; padding: 60px 20px; color: var(--text-light); font-size: 1.1rem; display: none; grid-column: 1 / -1; }
+  .no-results.visible { display: block; }
+
+  @media (max-width: 600px) {
+    header h1 { font-size: 1.6rem; }
+    .animals-grid { grid-template-columns: 1fr; padding: 16px; }
+    .tab-btn { padding: 10px 20px; font-size: 0.9rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🐾 Mes Animaux</h1>
+  <p>Panneau documentaire – Description physique</p>
+  <div class="search-wrap">
+    <input type="text" id="searchInput" placeholder="Cherche ton animal…" oninput="filterAnimals()">
+  </div>
+</header>
+
+<div class="tabs-wrap">
+  <button class="tab-btn active-3p" id="btn3p" onclick="switchTab('3p')">🔵 3P <span class="level-badge">phrases courtes</span></button>
+  <button class="tab-btn inactive-4p" id="btn4p" onclick="switchTab('4p')">🟣 4P <span class="level-badge">texte complet</span></button>
+</div>
+
+<div class="animals-grid" id="grid">
+
+  <!-- QUETZALCOATLUS -->
+  <div class="animal-card" data-name="quetzalcoatlus quetzalcoatlus">
+    <div class="card-visual">
+      <div class="card-big-emoji">🦕</div>
+      <div class="card-photo-links">
+        <a class="photo-link" href="https://fr.wikipedia.org/wiki/Quetzalcoatlus#/media/Fichier:Quetzalcoatlus_DB.jpg" target="_blank">📷 Reconstitution entière</a>
+        <a class="photo-link" href="https://fr.wikipedia.org/wiki/Quetzalcoatlus#/media/Fichier:Quetzalcoatlus_size_comparison.png" target="_blank">📷 Comparaison de taille</a>
+        <a class="photo-link" href="https://fr.wikipedia.org/wiki/Quetzalcoatlus" target="_blank">🔎 Page Wikipedia</a>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="card-title">Le quetzalcoatlus</div>
+      <span class="card-tag tag-fossile">Ptérosaure fossile</span>
+      <div class="desc-3p visible">
+        <div class="desc-label label-3p">📖 3P – phrases simples</div>
+        <p class="desc-text">Mon animal est un reptile volant préhistorique, ce n'est pas un dinosaure.<br>Il avait de très grandes ailes, comme une chauve-souris géante.<br>Sa tête était longue avec un grand bec pointu et sans dents.<br>Il était aussi grand qu'une girafe debout !</p>
+      </div>
+      <div class="desc-4p">
+        <div class="desc-label label-4p">📖 4P – texte détaillé</div>
+        <p class="desc-text">Le quetzalcoatlus est un ptérosaure, un reptile volant qui vivait il y a environ 68 millions d'années. C'est l'un des plus grands animaux volants de tous les temps : son envergure pouvait atteindre 10 à 11 mètres, soit autant qu'un avion de chasse ! Debout, il mesurait environ 5 mètres de haut. Sa tête démesurée portait un long bec sans dents. Ses ailes étaient formées d'une membrane de peau tendue le long d'un quatrième doigt très allongé. Son corps était probablement recouvert d'une fourrure fine.</p>
+      </div>
+      <div class="body-parts">
+        <div class="body-parts-title">🏷️ Mots pour légender</div>
+        <div class="body-parts-list"><span class="body-part-tag">grandes ailes</span><span class="body-part-tag">membrane</span><span class="body-part-tag">long bec</span><span class="body-part-tag">crête</span><span class="body-part-tag">long cou</span><span class="body-part-tag">pattes</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ZÈBRE -->
+  <div class="animal-card" data-name="zèbre zebre">
+    <div class="card-visual">
+      <div class="card-big-emoji">🦓</div>
+      <div class="card-photo-links">
+        <a class="photo-link" href="https://fr.wikipedia.org/wiki/Z%C3%A8bre_des_plaines#/media/Fichier:Plains_Zebra_Equus_quagga.jpg" target="_blank">📷 Corps entier</a>
+        <a class="photo-link" href="https://fr.wikipedia.org/wiki/Z%C3%A8bre_des_plaines#/media/Fichier:Zebra_Botswana_edit02.jpg" target="_blank">📷 Rayures en détail</a>
+        <a class="photo-link" href="https://fr.wikipedia.org/wiki/Z%C3%A8bre" target="_blank">🔎 Page Wikipedia</a>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="card-title">Le zèbre</div>
+      <span class="card-tag tag-mammifere">Mammifère</span>
+      <div class="desc-3p visible">
+        <div class="desc-label label-3p">📖 3P – phrases simples</div>
+        <p class="desc-text">Mon animal est grand et blanc avec des rayures noires.<br>Il a quatre pattes solides et un museau allongé.<br>Sa crinière est dressée sur le dessus de son cou.<br>Sa queue est fine avec des poils au bout.</p>
+      </div>
+      <div class="desc-4p">
+        <div class="desc-label label-4p">📖 4P – texte détaillé</div>
+        <p class="desc-text">Le zèbre est un mammifère de grande taille, reconnaissable à ses rayures noires et blanches uniques : aucun zèbre n'a exactement le même dessin. Il mesure environ 1,3 m au garrot et pèse entre 300 et 400 kg. Son corps est musculeux, porté par quatre longues pattes aux sabots durs. Sa crinière noire et dressée court de la tête au milieu du dos, et sa queue se termine par un pinceau de poils sombres.</p>
+      </div>
+      <div class="body-parts">
+        <div class="body-parts-title">🏷️ Mots pour légender</div>
+        <div class="body-parts-list"><span class="body-part-tag">rayures noires</span><span class="body-part-tag">crinière</span><span class="body-part-tag">sabot</span><span class="body-part-tag">queue</span><span class="body-part-tag">museau</span><span class="body-part-tag">cou</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LÉOPARD -->
+  <div class="animal-card" data-name="léopard leopard">
+    <div class="card-visual">
+      <div class="card-big-emoji">🐆</div>
+      <div class="card-photo-links">
+        <a class="photo-link" href="https://fr.wikipedia.org/wiki/L%C3%A9opard#/media/Fichier:Leopard_portrait.jpg" target="_blank">📷 Portrait</a>
+        <a class="photo-link" href="https://fr.wikipedia.org/wiki/L%C3%A9opard#/media/Fichier:Leopard_africa.jpg" target="_blank">📷 Corps entier</a>
+        <a class="photo-link" href="https://fr.wikipedia.org/wiki/L%C3%A9opard" target="_blank">🔎 Page Wikipedia</a>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="card-title">Le léopard</div>
+      <span class="card-tag tag-mammifere">Mammifère</span>
+      <div class="desc-3p visible">
+        <div class="desc-label label-3p">📖 3P – phrases simples</div>
+        <p class="desc-text">Mon animal est un grand chat sauvage de couleur dorée.<br>Son corps est recouvert de taches noires rondes.<br>Il a une longue queue tachetée.<br>Ses pattes sont très musclées.</p>
+      </div>
+      <div class="desc-4p">
+        <div class="desc-label label-4p">📖 4P – texte détaillé</div>
+        <p class="desc-text">Le léopard est un grand félin au pelage doré parsemé de taches noires en forme de rosaces. Il mesure entre 60 et 70 cm au garrot pour une longueur de 1,3 à 1,9 m. Son corps est très musculeux, avec de puissantes pattes munies de griffes rétractables. Sa longue queue, également tachetée, lui sert d'équilibre lors des sauts. Ses yeux verts ou ambrés lui permettent de voir dans la pénombre.</p>
+      </div>
+      <div class="body-parts">
+        <div class="body-parts-title">🏷️ Mots pour légender</div>
+        <div class="body-parts-list"><span class="body-part-tag">taches noires</span><span class="body-part-tag">pelage doré</span><span class="body-part-tag">griffes</span><span class="body-part-tag">queue longue</span><span class="body-part-tag">moustaches</span><span class="body-part-tag">oreilles rondes</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TORTUE -->
+  <div class="animal-card" data-name="tortue">
+    <div class="card-visual">
+      <div class="card-big-emoji">🐢</div>
+      <div class="card-photo-links">
+        <a class="photo-link" href="https://fr.wikipedia.org/wiki/Tortue#/media/Fichier:Chelonia_mydas_is_going_under_the_sea.jpg" target="_blank">📷 Corps entier</a>
+        <a class="photo-link" href="https://fr.wikipedia.org/wiki/Tortue#/media/Fichier:Florida_Box_Turtle_Digon3_re-edited.jpg" target="_blank">📷 Carapace</a>
+        <a class="photo-link" href="https://fr.wikipedia.org/wiki/Tortue" target="_blank">🔎 Page Wikipedia</a>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="card-title">La tortue</div>
+      <span class="card-tag tag-reptile">Reptile</span>
+      <div class="desc-3p visible">
+        <div class="desc-label label-3p">📖 3P – phrases simples</div>
+        <p class="desc-text">Mon animal a une grande carapace dure sur le dos.<br>Sa peau est écailleuse et de couleur verte ou brune.<br>Il a quatre pattes courtes et une petite tête.<br>Sa carapace le protège des ennemis.</p>
+      </div>
+      <div class="desc-4p">
+        <div class="desc-label label-4p">📖 4P – texte détaillé</div>
+        <p class="desc-text">La tortue est un reptile reconnaissable à sa carapace dure, formée de plaques d'os recouvertes d'écailles. Sa peau est rugueuse et de couleur verte, brune ou grise selon l'espèce. Les tortues marines ont des nageoires aplaties, tandis que les tortues terrestres ont des pattes courtes et robustes. Leur tête, petite et triangulaire, peut se rétracter dans la carapace en cas de danger. Elles n'ont pas de dents, mais un bec dur pour couper la nourriture.</p>
+      </div>
+      <div class="body-parts">
+        <div class="body-parts-title">🏷️ Mots pour légender</div>
+        <div class="body-parts-list"><span class="body-part-tag">carapace</span><span class="body-part-tag">écailles</span><span class="body-part-tag">pattes courtes</span><span class="body-part-tag">bec</span><span class="body-part-tag">tête</span><span class="body-part-tag">queue courte</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PANDA -->
+  <div class="animal-card" data-name="panda">
+    <div class="card-visual">
+      <div class="card-big-emoji">🐼</div>
+      <div class="card-photo-links">
+        <a class="photo-link" href="https://fr.wikipedia.org/wiki/Panda_g%C3%A9ant#/media/Fichier:Giant_panda_at_Vienna_Zoo.jpg" target="_blank">📷 Corps entier</a>
+        <a class="photo-link" href="https://fr.wikipedia.org/wiki/Panda_g%C3%A9ant#/media/Fichier:Grosser_Panda.JPG" target="_blank">📷 Portrait</a>
+        <a class="photo-link" href="https://fr.wikipedia.org/wiki/Panda_g%C3%A9ant" target="_blank">🔎 Page Wikipedia</a>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="card-title">Le panda</div>
+      <span class="card-tag tag-mammifere">Mammifère</span>
+      <div class="desc-3p visible">
+        <div class="desc-label label-3p">📖 3P – phrases simples</div>
+        <p class="desc-text">Mon animal est grand et gros avec du poil blanc et noir.<br>Il a de grandes taches noires autour des yeux.<br>Ses pattes sont noires et ses oreilles aussi.<br>Il a un corps rond et une petite queue.</p>
+      </div>
+      <div class="desc-4p">
+        <div class="desc-label label-4p">📖 4P – texte détaillé</div>
+        <p class="desc-text">Le panda géant est un grand mammifère au pelage blanc et noir très reconnaissable. Ses yeux sont entourés de larges cernes noirs, et ses oreilles, pattes et épaules sont également noires. Il peut peser jusqu'à 150 kg pour une hauteur d'environ 75 cm au garrot. Son corps est massif et arrondi. Il possède un sixième doigt modifié en forme de « pouce » qui lui permet de saisir les tiges de bambou.</p>
+      </div>
+      <div class="body-parts">
+        <div class="body-parts-title">🏷️ Mots pour légender</div>
+        <div class="body-parts-list"><span class="body-part-tag">cernes noirs</span><span class="body-part-tag">poil blanc</span><span class="body-part-tag">oreilles noires</span><span class="body-part-tag">griffes</span><span class="body-part-tag">pattes</span><span class="body-part-tag">museau</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AMMONITE -->
+  <div class="animal-card" data-name="ammonite">
+    <div class="card-visual">
+      <div class="card-big-emoji">🌀</div>
+      <div class="card-photo-links">
+        <a class="photo-link" href="https://fr.wikipedia.org/wiki/Ammonoidea#/media/Fichier:Ammonite_Asteroceras.jpg" target="_blank">📷 Fossile entier</a>
+        <a class="photo-link" href="https://fr.wikipedia.org/wiki/Ammonoidea#/media/Fichier:Ammonite_section.jpg" target="_blank">📷 Coupe intérieure</a>
+        <a class="photo-link" href="https://fr.wikipedia.org/wiki/Ammonoidea" target="_blank">🔎 Page Wikipedia</a>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="card-title">L'ammonite</div>
+      <span class="card-tag tag-fossile">Fossile</span>
+      <div class="desc-3p visible">
+        <div class="desc-label label-3p">📖 3P – phrases simples</div>
+        <p class="desc-text">Mon animal vivait il y a très longtemps, c'est un fossile.<br>Il avait une coquille ronde en spirale.<br>Sa coquille était divisée en petites chambres à l'intérieur.<br>Il ressemblait un peu à un escargot de mer.</p>
+      </div>
+      <div class="desc-4p">
+        <div class="desc-label label-4p">📖 4P – texte détaillé</div>
+        <p class="desc-text">L'ammonite est un animal marin disparu qui vivait entre 400 et 66 millions d'années. Sa coquille enroulée en spirale pouvait mesurer de quelques centimètres à plus d'un mètre ! À l'intérieur, elle était divisée en chambres séparées par des parois appelées cloisons. L'animal vivait dans la dernière chambre et se déplaçait en expulsant de l'eau. On reconnaît les ammonites à leurs cloisons aux bords découpés, appelées sutures, visibles sur les fossiles.</p>
+      </div>
+      <div class="body-parts">
+        <div class="body-parts-title">🏷️ Mots pour légender</div>
+        <div class="body-parts-list"><span class="body-part-tag">coquille spirale</span><span class="body-part-tag">chambres</span><span class="body-part-tag">cloisons</span><span class="body-part-tag">sutures</span><span class="body-part-tag">ombilic</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HIRONDELLE -->
+  <div class="animal-card" data-name="hirondelle">
+    <div class="card-visual">
+      <div class="card-big-emoji">🐦</div>
+      <div class="card-photo-links">
+        <a class="photo-link" href="https://fr.wikipedia.org/wiki/Hirondelle_rustique#/media/Fichier:Hirundo_rustica_-Perched_on_branch-8.jpg" target="_blank">📷 Perchée</a>
+        <a class="photo-link" href="https://fr.wikipedia.org/wiki/Hirondelle_rustique#/media/Fichier:Hirundo_rustica_-flying-8.jpg" target="_blank">📷 En vol</a>
+        <a class="photo-link" href="https://fr.wikipedia.org/wiki/Hirondelle_rustique" target="_blank">🔎 Page Wikipedia</a>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="card-title">L'hirondelle</div>
+      <span class="card-tag tag-oiseau">Oiseau</span>
+      <div class="desc-3p visible">
+        <div class="desc-label label-3p">📖 3P – phrases simples</div>
+        <p class="desc-text">Mon animal est un petit oiseau avec le dos bleu foncé.<br>Son ventre est blanc ou roux.<br>Sa queue est fourchue, en forme de V.<br>Ses ailes sont longues et pointues.</p>
+      </div>
+      <div class="desc-4p">
+        <div class="desc-label label-4p">📖 4P – texte détaillé</div>
+        <p class="desc-text">L'hirondelle de cheminée est un petit oiseau élancé, au dos bleu-noir brillant et au ventre blanc-roux. Sa gorge est rougeâtre, bordée d'une bande sombre. Sa queue fourchue, avec deux longues plumes effilées, est sa caractéristique la plus reconnaissable. Ses ailes sont longues, étroites et très efficaces pour voler rapidement. Elle mesure environ 17 cm et pèse moins de 20 grammes.</p>
+      </div>
+      <div class="body-parts">
+        <div class="body-parts-title">🏷️ Mots pour légender</div>
+        <div class="body-parts-list"><span class="body-part-tag">queue fourchue</span><span class="body-part-tag">dos bleu-noir</span><span class="body-part-tag">ailes longues</span><span class="body-part-tag">gorge rousse</span><span class="body-part-tag">bec fin</span><span class="body-part-tag">ventre blanc</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AIGLE -->
+  <div class="animal-card" data-name="aigle">
+    <div class="card-visual">
+      <div class="card-big-emoji">🦅</div>
+      <div class="card-photo-links">
+        <a class="photo-link" href="https://fr.wikipedia.org/wiki/Aigle_royal#/media/Fichier:Golden_Eagle_in_flight.jpg" target="_blank">📷 En vol</a>
+        <a class="photo-link" href="https://fr.wikipedia.org/wiki/Aigle_royal#/media/Fichier:Aquila_chrysaetos_01.jpg" target="_blank">📷 Portrait</a>
+        <a class="photo-link" href="https://fr.wikipedia.org/wiki/Aigle_royal" target="_blank">🔎 Page Wikipedia</a>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="card-title">L'aigle</div>
+      <span class="card-tag tag-oiseau">Oiseau</span>
+      <div class="desc-3p visible">
+        <div class="desc-label label-3p">📖 3P – phrases simples</div>
+        <p class="desc-text">Mon animal est un grand oiseau avec des plumes brunes.<br>Il a un bec crochu, jaune et très solide.<br>Ses serres sont grandes et tranchantes.<br>Ses grandes ailes lui permettent de planer très haut.</p>
+      </div>
+      <div class="desc-4p">
+        <div class="desc-label label-4p">📖 4P – texte détaillé</div>
+        <p class="desc-text">L'aigle royal est un grand rapace au plumage brun foncé, avec des teintes dorées sur la nuque. Son envergure peut atteindre 2,2 mètres. Il possède un bec crochu très puissant, jaune à la base, adapté pour déchirer la chair. Ses pattes sont garnies de serres acérées pour attraper ses proies. Ses larges ailes aux plumes terminales en « doigts » lui permettent de planer avec une grande efficacité.</p>
+      </div>
+      <div class="body-parts">
+        <div class="body-parts-title">🏷️ Mots pour légender</div>
+        <div class="body-parts-list"><span class="body-part-tag">bec crochu</span><span class="body-part-tag">serres</span><span class="body-part-tag">grandes ailes</span><span class="body-part-tag">plumes brunes</span><span class="body-part-tag">yeux perçants</span><span class="body-part-tag">queue</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LOUP -->
+  <div class="animal-card" data-name="loup">
+    <div class="card-visual">
+      <div class="card-big-emoji">🐺</div>
+      <div class="card-photo-links">
+        <a class="photo-link" href="https://fr.wikipedia.org/wiki/Loup_gris#/media/Fichier:Kolm%C3%A5rdens_Wolf.jpg" target="_blank">📷 Corps entier</a>
+        <a class="photo-link" href="https://fr.wikipedia.org/wiki/Loup_gris#/media/Fichier:Wolf_portrait2.jpg" target="_blank">📷 Portrait</a>
+        <a class="photo-link" href="https://fr.wikipedia.org/wiki/Loup_gris" target="_blank">🔎 Page Wikipedia</a>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="card-title">Le loup</div>
+      <span class="card-tag tag-mammifere">Mammifère</span>
+      <div class="desc-3p visible">
+        <div class="desc-label label-3p">📖 3P – phrases simples</div>
+        <p class="desc-text">Mon animal ressemble à un grand chien sauvage.<br>Son poil est gris, brun ou beige selon les loups.<br>Il a un museau long, de grandes oreilles dressées et une longue queue.<br>Ses yeux sont jaunes ou orangés.</p>
+      </div>
+      <div class="desc-4p">
+        <div class="desc-label label-4p">📖 4P – texte détaillé</div>
+        <p class="desc-text">Le loup gris est un grand canidé au pelage épais variant du gris au brun ou au beige. Il mesure environ 70 cm au garrot pour une longueur de 1 à 1,5 m, et peut peser entre 30 et 50 kg. Son museau allongé est garni de dents très puissantes. Ses oreilles droites et triangulaires sont très mobiles, et ses yeux, souvent jaunes ou ambrés, lui donnent un regard perçant. Ses longues pattes et ses coussinets robustes sont adaptés à de longues courses.</p>
+      </div>
+      <div class="body-parts">
+        <div class="body-parts-title">🏷️ Mots pour légender</div>
+        <div class="body-parts-list"><span class="body-part-tag">poil épais</span><span class="body-part-tag">museau allongé</span><span class="body-part-tag">oreilles dressées</span><span class="body-part-tag">yeux jaunes</span><span class="body-part-tag">queue touffue</span><span class="body-part-tag">coussinets</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CALOPSITTE -->
+  <div class="animal-card" data-name="calopsitte">
+    <div class="card-visual">
+      <div class="card-big-emoji">🦜</div>
+      <div class="card-photo-links">
+        <a class="photo-link" href="https://fr.wikipedia.org/wiki/Calopsitte_%C3%A9l%C3%A9gante#/media/Fichier:Nymphicus_hollandicus.jpg" target="_blank">📷 Corps entier</a>
+        <a class="photo-link" href="https://fr.wikipedia.org/wiki/Calopsitte_%C3%A9l%C3%A9gante#/media/Fichier:Cockatiel_lutino.jpg" target="_blank">📷 Variété jaune</a>
+        <a class="photo-link" href="https://fr.wikipedia.org/wiki/Calopsitte_%C3%A9l%C3%A9gante" target="_blank">🔎 Page Wikipedia</a>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="card-title">La calopsitte</div>
+      <span class="card-tag tag-oiseau">Oiseau</span>
+      <div class="desc-3p visible">
+        <div class="desc-label label-3p">📖 3P – phrases simples</div>
+        <p class="desc-text">Mon animal est un petit oiseau avec une crête pointue sur la tête.<br>Son corps est gris et ses joues ont des taches orangées rondes.<br>Il a un bec court et courbé.<br>Sa longue queue est grise et fine.</p>
+      </div>
+      <div class="desc-4p">
+        <div class="desc-label label-4p">📖 4P – texte détaillé</div>
+        <p class="desc-text">La calopsitte élégante est un petit perroquet d'environ 30 cm, reconnaissable à sa crête jaune pointue qu'elle dresse ou abaisse selon son humeur. Son plumage est généralement gris, avec des ailes rayées de blanc. Ses joues arborent des taches orangées caractéristiques. Son bec court et crochu est adapté pour croquer des graines. La femelle est légèrement plus terne que le mâle.</p>
+      </div>
+      <div class="body-parts">
+        <div class="body-parts-title">🏷️ Mots pour légender</div>
+        <div class="body-parts-list"><span class="body-part-tag">crête jaune</span><span class="body-part-tag">joues orangées</span><span class="body-part-tag">bec crochu</span><span class="body-part-tag">plumes grises</span><span class="body-part-tag">longue queue</span><span class="body-part-tag">ailes</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LAPIN -->
+  <div class="animal-card" data-name="lapin">
+    <div class="card-visual">
+      <div class="card-big-emoji">🐰</div>
+      <div class="card-photo-links">
+        <a class="photo-link" href="https://fr.wikipedia.org/wiki/Lapin_de_garenne#/media/Fichier:Oryctolagus_cuniculus_Rcdo.jpg" target="_blank">📷 Corps entier</a>
+        <a class="photo-link" href="https://fr.wikipedia.org/wiki/Lapin_de_garenne#/media/Fichier:Oryctolagus_cuniculus_Tasmania_2.jpg" target="_blank">📷 Oreilles</a>
+        <a class="photo-link" href="https://fr.wikipedia.org/wiki/Lapin_de_garenne" target="_blank">🔎 Page Wikipedia</a>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="card-title">Le lapin</div>
+      <span class="card-tag tag-mammifere">Mammifère</span>
+      <div class="desc-3p visible">
+        <div class="desc-label label-3p">📖 3P – phrases simples</div>
+        <p class="desc-text">Mon animal est petit avec un poil doux et brun ou blanc.<br>Il a de très grandes oreilles dressées.<br>Ses pattes arrière sont plus longues que ses pattes avant.<br>Sa queue est ronde et toute petite, comme un pompon.</p>
+      </div>
+      <div class="desc-4p">
+        <div class="desc-label label-4p">📖 4P – texte détaillé</div>
+        <p class="desc-text">Le lapin est un petit mammifère au poil dense et doux, généralement gris-brun, blanc ou tacheté. Ses longues oreilles, pouvant atteindre 7 cm, lui permettent d'entendre les prédateurs de très loin. Ses pattes postérieures, bien plus puissantes que les antérieures, lui permettent de faire de grands bonds. Son museau frémissant abrite un excellent odorat. Sa petite queue ronde et blanche, appelée « fleur », est caractéristique.</p>
+      </div>
+      <div class="body-parts">
+        <div class="body-parts-title">🏷️ Mots pour légender</div>
+        <div class="body-parts-list"><span class="body-part-tag">grandes oreilles</span><span class="body-part-tag">poil doux</span><span class="body-part-tag">pattes arrière</span><span class="body-part-tag">museau</span><span class="body-part-tag">queue ronde</span><span class="body-part-tag">moustaches</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHEVAL -->
+  <div class="animal-card" data-name="cheval">
+    <div class="card-visual">
+      <div class="card-big-emoji">🐴</div>
+      <div class="card-photo-links">
+        <a class="photo-link" href="https://fr.wikipedia.org/wiki/Cheval#/media/Fichier:Nokota_Horses_cropped.jpg" target="_blank">📷 Corps entier</a>
+        <a class="photo-link" href="https://fr.wikipedia.org/wiki/Cheval#/media/Fichier:A_horse-head.jpg" target="_blank">📷 Tête et crinière</a>
+        <a class="photo-link" href="https://fr.wikipedia.org/wiki/Cheval" target="_blank">🔎 Page Wikipedia</a>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="card-title">Le cheval</div>
+      <span class="card-tag tag-mammifere">Mammifère</span>
+      <div class="desc-3p visible">
+        <div class="desc-label label-3p">📖 3P – phrases simples</div>
+        <p class="desc-text">Mon animal est grand avec un poil brun, noir ou blanc.<br>Il a quatre longues pattes avec des sabots durs au bout.<br>Sa crinière est longue et tombe sur son cou.<br>Sa queue est longue et faite de poils épais.</p>
+      </div>
+      <div class="desc-4p">
+        <div class="desc-label label-4p">📖 4P – texte détaillé</div>
+        <p class="desc-text">Le cheval est un grand mammifère herbivore qui peut mesurer jusqu'à 1,7 m au garrot et peser plus de 500 kg. Son corps musculeux est recouvert d'un poil court, dans des teintes très variées : bai, alezan, noir, gris ou blanc. Sa longue crinière et sa queue fournie de longs poils sont caractéristiques. Ses quatre sabots, faits de kératine, lui permettent de courir très vite sur des terrains variés.</p>
+      </div>
+      <div class="body-parts">
+        <div class="body-parts-title">🏷️ Mots pour légender</div>
+        <div class="body-parts-list"><span class="body-part-tag">crinière</span><span class="body-part-tag">sabot</span><span class="body-part-tag">queue</span><span class="body-part-tag">encolure</span><span class="body-part-tag">naseaux</span><span class="body-part-tag">oreilles</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHAT -->
+  <div class="animal-card" data-name="chat">
+    <div class="card-visual">
+      <div class="card-big-emoji">🐱</div>
+      <div class="card-photo-links">
+        <a class="photo-link" href="https://fr.wikipedia.org/wiki/Chat_domestique#/media/Fichier:Cat_November_2010-1a.jpg" target="_blank">📷 Corps entier</a>
+        <a class="photo-link" href="https://fr.wikipedia.org/wiki/Chat_domestique#/media/Fichier:Felis_catus-cat_on_snow.jpg" target="_blank">📷 Pattes et griffes</a>
+        <a class="photo-link" href="https://fr.wikipedia.org/wiki/Chat_domestique" target="_blank">🔎 Page Wikipedia</a>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="card-title">Le chat</div>
+      <span class="card-tag tag-mammifere">Mammifère</span>
+      <div class="desc-3p visible">
+        <div class="desc-label label-3p">📖 3P – phrases simples</div>
+        <p class="desc-text">Mon animal est petit et souple avec un poil doux.<br>Il a de grandes oreilles pointues et des yeux en amande.<br>Ses pattes ont des griffes rétractables.<br>Sa longue queue l'aide à garder l'équilibre.</p>
+      </div>
+      <div class="desc-4p">
+        <div class="desc-label label-4p">📖 4P – texte détaillé</div>
+        <p class="desc-text">Le chat domestique est un félin agile et souple, au pelage très varié : uni, tigré, écaille de tortue, etc. Ses yeux en amande possèdent des pupilles qui se dilatent dans l'obscurité. Ses oreilles triangulaires et très mobiles captent les sons avec précision. Ses pattes sont garnies de coussinets mous et de griffes rétractables. Sa longue queue expressive trahit ses émotions. Il possède des moustaches sensitives appelées vibrisses.</p>
+      </div>
+      <div class="body-parts">
+        <div class="body-parts-title">🏷️ Mots pour légender</div>
+        <div class="body-parts-list"><span class="body-part-tag">moustaches</span><span class="body-part-tag">griffes</span><span class="body-part-tag">coussinets</span><span class="body-part-tag">oreilles pointues</span><span class="body-part-tag">pupilles</span><span class="body-part-tag">queue</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MOUCHE -->
+  <div class="animal-card" data-name="mouche">
+    <div class="card-visual">
+      <div class="card-big-emoji">🪰</div>
+      <div class="card-photo-links">
+        <a class="photo-link" href="https://fr.wikipedia.org/wiki/Mouche_domestique#/media/Fichier:Fly_portrait.jpg" target="_blank">📷 Corps entier</a>
+        <a class="photo-link" href="https://fr.wikipedia.org/wiki/Mouche_domestique#/media/Fichier:Compound_eye_of_a_fly.jpg" target="_blank">📷 Œil à facettes</a>
+        <a class="photo-link" href="https://fr.wikipedia.org/wiki/Mouche_domestique" target="_blank">🔎 Page Wikipedia</a>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="card-title">La mouche</div>
+      <span class="card-tag tag-insecte">Insecte</span>
+      <div class="desc-3p visible">
+        <div class="desc-label label-3p">📖 3P – phrases simples</div>
+        <p class="desc-text">Mon animal est un petit insecte avec le corps noir et gris.<br>Il a deux grandes ailes transparentes.<br>Ses yeux sont très grands et rouges, ils font le tour de la tête.<br>Il a six pattes avec des petits crochets au bout.</p>
+      </div>
+      <div class="desc-4p">
+        <div class="desc-label label-4p">📖 4P – texte détaillé</div>
+        <p class="desc-text">La mouche domestique est un insecte de 6 à 8 mm au corps gris strié de noir. Comme tous les insectes, elle a trois parties : la tête, le thorax et l'abdomen. Elle possède deux ailes transparentes qui battent jusqu'à 200 fois par seconde. Ses yeux à facettes, d'un rouge caractéristique, lui offrent une vision presque à 360°. Ses six pattes sont terminées par des ventouses microscopiques lui permettant de marcher sur les parois verticales.</p>
+      </div>
+      <div class="body-parts">
+        <div class="body-parts-title">🏷️ Mots pour légender</div>
+        <div class="body-parts-list"><span class="body-part-tag">yeux à facettes</span><span class="body-part-tag">ailes transparentes</span><span class="body-part-tag">6 pattes</span><span class="body-part-tag">antennes</span><span class="body-part-tag">abdomen</span><span class="body-part-tag">thorax</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAON -->
+  <div class="animal-card" data-name="paon">
+    <div class="card-visual">
+      <div class="card-big-emoji">🦚</div>
+      <div class="card-photo-links">
+        <a class="photo-link" href="https://fr.wikipedia.org/wiki/Paon_bleu#/media/Fichier:Peacock_Plumage.jpg" target="_blank">📷 Queue déployée</a>
+        <a class="photo-link" href="https://fr.wikipedia.org/wiki/Paon_bleu#/media/Fichier:Pavo_cristatus_-Kobe_Oji_Zoo,_Japan-8a.jpg" target="_blank">📷 Corps entier</a>
+        <a class="photo-link" href="https://fr.wikipedia.org/wiki/Paon_bleu" target="_blank">🔎 Page Wikipedia</a>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="card-title">Le paon</div>
+      <span class="card-tag tag-oiseau">Oiseau</span>
+      <div class="desc-3p visible">
+        <div class="desc-label label-3p">📖 3P – phrases simples</div>
+        <p class="desc-text">Mon animal a un long cou et une tête bleu brillant.<br>Il a une très grande queue avec des plumes en forme d'œil.<br>Sa queue peut former un grand éventail coloré.<br>Sa tête est ornée d'une petite couronne de plumes.</p>
+      </div>
+      <div class="desc-4p">
+        <div class="desc-label label-4p">📖 4P – texte détaillé</div>
+        <p class="desc-text">Le paon bleu est un grand oiseau au plumage éblouissant. Le mâle possède un corps bleu-vert métallique et une longue traîne composée de plumes aux ocelles multicolores en forme d'œil. Déployée, cette traîne peut atteindre 1,5 m de largeur. Sa petite tête est ornée d'une aigrette de plumes en éventail. La femelle, la paonne, est beaucoup plus discrète, avec un plumage brun-vert terne.</p>
+      </div>
+      <div class="body-parts">
+        <div class="body-parts-title">🏷️ Mots pour légender</div>
+        <div class="body-parts-list"><span class="body-part-tag">traîne (queue)</span><span class="body-part-tag">ocelles</span><span class="body-part-tag">aigrette</span><span class="body-part-tag">cou bleu</span><span class="body-part-tag">bec</span><span class="body-part-tag">pattes</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CACHALOT -->
+  <div class="animal-card" data-name="cachalot">
+    <div class="card-visual">
+      <div class="card-big-emoji">🐋</div>
+      <div class="card-photo-links">
+        <a class="photo-link" href="https://fr.wikipedia.org/wiki/Cachalot#/media/Fichier:Sperm_whale2.jpg" target="_blank">📷 Corps entier</a>
+        <a class="photo-link" href="https://fr.wikipedia.org/wiki/Cachalot#/media/Fichier:Sperm_whale_fluke.jpg" target="_blank">📷 Nageoire caudale</a>
+        <a class="photo-link" href="https://fr.wikipedia.org/wiki/Cachalot" target="_blank">🔎 Page Wikipedia</a>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="card-title">Le cachalot</div>
+      <span class="card-tag tag-mammifere">Mammifère</span>
+      <div class="desc-3p visible">
+        <div class="desc-label label-3p">📖 3P – phrases simples</div>
+        <p class="desc-text">Mon animal est très grand, c'est le plus grand animal à dents du monde.<br>Son corps est gris foncé et ridé.<br>Sa tête est énorme et carrée.<br>Il a une nageoire caudale large et plate à l'arrière.</p>
+      </div>
+      <div class="desc-4p">
+        <div class="desc-label label-4p">📖 4P – texte détaillé</div>
+        <p class="desc-text">Le cachalot est le plus grand prédateur à dents de la planète, pouvant mesurer jusqu'à 18 m et peser 50 tonnes. Son corps fuselé est gris foncé et souvent ridé. Sa tête cubique, qui représente un tiers de sa longueur, contient un organe spécial pour la plongée et la communication. Sa mâchoire inférieure est garnie de dents coniques. Ses nageoires pectorales sont courtes, et sa nageoire caudale en forme de V lui permet de nager puissamment.</p>
+      </div>
+      <div class="body-parts">
+        <div class="body-parts-title">🏷️ Mots pour légender</div>
+        <div class="body-parts-list"><span class="body-part-tag">tête carrée</span><span class="body-part-tag">nageoire caudale</span><span class="body-part-tag">évent</span><span class="body-part-tag">dents</span><span class="body-part-tag">nageoire pectorale</span><span class="body-part-tag">peau ridée</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="no-results" id="noResults">Aucun animal trouvé 🐾</div>
+</div>
+
+<script>
+  function switchTab(tab) {
+    document.getElementById('btn3p').className = tab === '3p' ? 'tab-btn active-3p' : 'tab-btn inactive-3p';
+    document.getElementById('btn4p').className = tab === '4p' ? 'tab-btn active-4p' : 'tab-btn inactive-4p';
+    document.querySelectorAll('.desc-3p').forEach(el => el.classList.toggle('visible', tab === '3p'));
+    document.querySelectorAll('.desc-4p').forEach(el => el.classList.toggle('visible', tab === '4p'));
+  }
+  function filterAnimals() {
+    const q = document.getElementById('searchInput').value.toLowerCase().trim();
+    const cards = document.querySelectorAll('.animal-card');
+    let n = 0;
+    cards.forEach(c => {
+      const match = c.dataset.name.toLowerCase().includes(q) || c.querySelector('.card-title').textContent.toLowerCase().includes(q);
+      c.classList.toggle('hidden', !match);
+      if (match) n++;
+    });
+    document.getElementById('noResults').classList.toggle('visible', n === 0);
+  }
+  switchTab('3p');
+</script>
+</body>
+</html>
